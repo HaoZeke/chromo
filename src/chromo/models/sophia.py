@@ -91,10 +91,7 @@ class Sophia20(MCRun):
         idb = self._lib.s_csydec.idb
         if sid < 0 or sid > idb.size:
             raise ValueError(f"{pdgid} is unknown")
-        if stable:
-            idb[sid] = -abs(idb[sid])
-        else:
-            idb[sid] = abs(idb[sid])
+        idb[sid] = -abs(idb[sid]) if stable else abs(idb[sid])
 
     def _generate(self):
         # Generate event (the final particles and their parameters)

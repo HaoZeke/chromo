@@ -63,9 +63,8 @@ def run_model(Model, kin, number=1):
             h.fill(ev.eta, np.abs(ev.pid))
         if number == 1:
             return h
-        else:
-            values.append(h.values().copy())
-            h.reset()
+        values.append(h.values().copy())
+        h.reset()
     return values
 
 
@@ -204,7 +203,7 @@ def test_generator(projectile, target, frame, Model):
 
     threshold = 1e-6
 
-    if reference_generated or not (p_value >= threshold) or chromo.debug_level > 0:
+    if reference_generated or p_value < threshold or chromo.debug_level > 0:
         draw_comparison(fn, p_value, h.axes, values, val_ref, cov_ref)
 
     if reference_generated:

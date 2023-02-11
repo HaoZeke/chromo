@@ -61,7 +61,7 @@ class Pythia6(MCRun):
 
     def _cross_section(self, kin=None):
         s = self._lib.pyint7.sigt[0, 0]
-        c = CrossSectionData(
+        return CrossSectionData(
             total=s[0],
             elastic=s[1],
             inelastic=s[0] - s[1],
@@ -70,7 +70,6 @@ class Pythia6(MCRun):
             diffractive_xx=s[4],
             diffractive_axb=0,
         )
-        return c
 
     def _set_kinematics(self, kin):
         codes = []
@@ -86,9 +85,9 @@ class Pythia6(MCRun):
             if abs(pdg) != pdg:
                 last = code[-1]
                 if last == "+":
-                    code = code[:-1] + "-"
+                    code = f"{code[:-1]}-"
                 elif last == "-":
-                    code = code[:-1] + "+"
+                    code = f"{code[:-1]}+"
                 else:
                     code += "bar"
             codes.append(code)

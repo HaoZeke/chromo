@@ -37,23 +37,14 @@ def run(
     match = None
     if stdout is not None:
         actual = r.stdout.decode()
-        if stdout in actual:  # also check for literal match
-            match = True
-        else:
-            match = re.search(stdout, actual)
+        match = True if stdout in actual else re.search(stdout, actual)
         assert match, "\n" + actual
     if stderr is not None:
         actual = r.stderr.decode()
-        if stderr in actual:  # also check for literal match
-            match = True
-        else:
-            match = re.search(stderr, actual)
+        match = True if stderr in actual else re.search(stderr, actual)
         assert match, f"\n  [expected] {stderr}\n  [  got   ] {actual}"
     if file:
-        if match is not None:
-            p = Path(file.format(*match.groups()))
-        else:
-            p = Path(file)
+        p = Path(file.format(*match.groups())) if match is not None else Path(file)
         assert p.exists()
 
         if checks:
@@ -267,7 +258,7 @@ def test_format_1():
 def test_format_2(format, model):
     ext = format
     if ext.endswith("gz"):
-        ext = ext[:-2] + ".gz"
+        ext = f"{ext[:-2]}.gz"
 
     pyname = {"EPOS-LHC": "eposlhc", "SIBYLL-2.1": "sibyll21", "Pythia-6.4": "pythia6"}[
         model

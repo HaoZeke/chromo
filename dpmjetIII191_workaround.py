@@ -18,8 +18,7 @@ if not sys.argv[1:]:  # for testing
         "src/fortran/dpmjetIII-19.1/common",
     ]
     for d in dirs:
-        for fn in Path(d).rglob("*.f"):
-            src.append(fn)
+        src.extend(iter(Path(d).rglob("*.f")))
 else:
     with Path(sys.argv[3]).open() as f:
         src = f.read().split()
@@ -39,14 +38,13 @@ unchanged = []
 for fn in src:
     with fn.open() as f:
         c = f.read()
-    m = re.search(PATTERN, c, re.MULTILINE)
-    if m:
+    if m := re.search(PATTERN, c, re.MULTILINE):
         needs_mod.append(fn)
     else:
         unchanged.append(fn)
 
 # ensure filenames are not colliding
-assert len(set([x.name for x in needs_mod])) == len(needs_mod)
+assert len({x.name for x in needs_mod}) == len(needs_mod)
 
 modded = []
 for fn in needs_mod:

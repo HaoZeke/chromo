@@ -102,7 +102,7 @@ def test_to_hepmc3(Model):
         assert p.pid == event.pid[i]
         assert p.id == i + 1
 
-    for i, v in enumerate(hev.vertices):
+    for v in hev.vertices:
         k = v.particles_out[0].id - 1
         assert v.position.x == event.vx[k]
         assert v.position.y == event.vy[k]
@@ -112,10 +112,7 @@ def test_to_hepmc3(Model):
     hev_vertices = {}
     for v in hev.vertices:
         pi = [p.id - 1 for p in v.particles_in]
-        if len(pi) == 1:
-            pa = (pi[0], pi[0] + 1)
-        else:
-            pa = (min(pi), max(pi) + 1)
+        pa = (pi[0], pi[0] + 1) if len(pi) == 1 else (min(pi), max(pi) + 1)
         children = [p.id - 1 for p in v.particles_out]
         hev_vertices[pa] = children
 

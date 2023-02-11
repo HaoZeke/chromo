@@ -158,8 +158,9 @@ def mass(pdgid):
 
 def _make_name2pdg_db():
     all_particles = Particle.findall()
-    db = {p.name: p.pdgid for p in all_particles}
-    db.update({p.programmatic_name: p.pdgid for p in all_particles})
+    db = {p.name: p.pdgid for p in all_particles} | {
+        p.programmatic_name: p.pdgid for p in all_particles
+    }
     db["p"] = PDGID(2212)
     db["n"] = PDGID(2112)
     db["p~"] = -db["p"]
@@ -207,12 +208,7 @@ def pdg2name(pdgid):
 def is_AZ(arg):
     if not isinstance(arg, Sequence):
         return False
-    if len(arg) != 2:
-        return False
-    for x in arg:
-        if not isinstance(x, int):
-            return False
-    return True
+    return False if len(arg) != 2 else all(isinstance(x, int) for x in arg)
 
 
 def pdg2AZ(pdgid):
@@ -272,7 +268,7 @@ def fortran_chars(array_ref, char_seq):
     len_arr = int(str(array_ref.dtype)[2:])
     len_seq = len(char_seq)
     return np.array(
-        [c for c in char_seq + (len_arr - len_seq) * " "], dtype="S" + str(len_arr)
+        list(char_seq + (len_arr - len_seq) * " "), dtype=f"S{len_arr}"
     )
 
 
@@ -296,10 +292,8 @@ def caller_name(skip=2):
 
     name = []
 
-    module = inspect.getmodule(parentframe)
-    # `modname` can be None when frame is executed directly in console
-    if module:
-        name.append(module.__name__ + ".")
+    if module := inspect.getmodule(parentframe):
+        name.append(f"{module.__name__}.")
 
     # detect classname
     if "self" in parentframe.f_locals:
@@ -311,7 +305,7 @@ def caller_name(skip=2):
 
     codename = parentframe.f_code.co_name
     if codename != "<module>":  # top level usually
-        name.append(codename + "(): ")  # function or a method
+        name.append(f"{codename}(): ")
 
     del parentframe
     return "".join(name)
@@ -418,7 +412,7 @@ def _cached_data_dir(url):
             vfile.unlink
         with open(version_file, "w") as vf:
             vf.write(url)
-    return str(model_dir) + "/"
+    return f"{str(model_dir)}/"
 
 
 class TaggedFloat:
@@ -500,15 +494,7 @@ class classproperty:
 
 
 def _select_parents(mask, parents):
-    # This algorithm is slow in pure Python and should be
-    # speed up by compiling the logic.
-
-    # attach parentless particles to beam particles,
-    # unless those are also removed
-    fallback = (0, 0)
-    if mask[0] and mask[1]:
-        fallback = (1, 2)
-
+    fallback = (1, 2) if mask[0] and mask[1] else (0, 0)
     n = len(parents)
     indices = np.arange(n)[mask] + 1
     result = parents[mask]
@@ -538,11 +524,11 @@ def select_parents(arg, parents):
     if parents is None:
         return None
 
-    n = len(parents)
-
     if isinstance(arg, np.ndarray) and arg.dtype is bool:
         mask = arg
     else:
+        n = len(parents)
+
         mask = np.zeros(n, dtype=bool)
         mask[arg] = True
 

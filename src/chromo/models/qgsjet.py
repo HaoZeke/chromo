@@ -90,7 +90,8 @@ class QGSJet1Run(QGSJetRun):
             wa[0] = 1.0 - wa[1] + wa[2]
             wa[1] = wa[1] - 2.0 * wa[2]
             sectn = sum(
-                [self._lib.xsect.gsect[je, icz, ja + m - 1] * wa[m] for m in range(3)]
+                self._lib.xsect.gsect[je, icz, ja + m - 1] * wa[m]
+                for m in range(3)
             )
             cross_section[je] = np.exp(sectn)
 

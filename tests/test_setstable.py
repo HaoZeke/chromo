@@ -18,9 +18,7 @@ decay_list = [
 
 
 def run_model(Model, stable):
-    p1 = "p"
-    if Model.name == "Sophia":
-        p1 = "gamma"
+    p1 = "gamma" if Model.name == "Sophia" else "p"
     p2 = "p"
     kin = CenterOfMass(200 * GeV, p1, p2)
     model = Model(kin, seed=1)

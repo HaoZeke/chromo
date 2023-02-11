@@ -108,9 +108,7 @@ class EventKinematicsBase:
         def eq(a, b):
             if isinstance(a, Tuple):
                 return all(eq(ai, bi) for (ai, bi) in zip(a, b))
-            if isinstance(a, np.ndarray):
-                return np.array_equal(a, b)
-            return a == b
+            return np.array_equal(a, b) if isinstance(a, np.ndarray) else a == b
 
         return all(eq(a, b) for (a, b) in zip(at, bt))
 
