@@ -76,9 +76,7 @@ VALID_FORMATS = f"{', '.join(FORMATS)}"
 
 
 def extension(format):
-    if format.endswith("gz"):
-        return format[:-2] + ".gz"
-    return format
+    return f"{format[:-2]}.gz" if format.endswith("gz") else format
 
 
 def process_particle(x):
@@ -202,7 +200,7 @@ def parse_arguments():
         else:
             if len(matches) == 1:
                 Model = matches[0]
-            elif len(matches) == 0:
+            elif not matches:
                 raise SystemExit(
                     f"Error: model={args.model} has no match ({VALID_MODELS})"
                 )
@@ -272,9 +270,9 @@ def parse_arguments():
             args.out = Path(odir) / fn
 
         if not args.out.suffixes[-2:]:
-            ext = "." + args.output
+            ext = f".{args.output}"
             if ext.endswith("gz"):
-                ext = ext[:-2] + ".gz"
+                ext = f"{ext[:-2]}.gz"
             args.out = Path(args.out).with_suffix(ext)
 
     if args.output not in FORMATS:

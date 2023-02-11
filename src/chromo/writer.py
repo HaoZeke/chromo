@@ -47,30 +47,29 @@ class Root:
         assert millibarn == 1
 
         kin = model.kinematics
-        header = {
-            "model": model.label,
-            "seed": model.seed,
-            "projectile_id": int(kin.p1),
-            "projectile_momentum": kin.beams[0][2],
-            "target_id": (
-                repr(kin.p2) if isinstance(kin.p2, CompositeTarget) else int(kin.p2)
-            ),
-            "target_momentum": kin.beams[1][2],
-        }
-        header.update(
+        header = (
             {
+                "model": model.label,
+                "seed": model.seed,
+                "projectile_id": int(kin.p1),
+                "projectile_momentum": kin.beams[0][2],
+                "target_id": (
+                    repr(kin.p2)
+                    if isinstance(kin.p2, CompositeTarget)
+                    else int(kin.p2)
+                ),
+                "target_momentum": kin.beams[1][2],
+            }
+            | {
                 f"sigma_{k}": v
                 for (k, v) in dataclasses.asdict(model.cross_section()).items()
                 if not np.isnan(v)
             }
-        )
-        header.update(
-            {
+            | {
                 "energy_unit": "GeV",
                 "sigma_unit": "mb",
             }
         )
-
         self._file = uproot.recreate(file)
 
         self._event_buffers = {

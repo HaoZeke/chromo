@@ -23,11 +23,7 @@ def run_rng_state(Model):
     # Save a initial state to a variable:
     state_0 = deepcopy(generator.random_state)
 
-    # Generate nevents events
-    states = []
-    for _ in generator(nevents):
-        states.append(deepcopy(generator.random_state))
-
+    states = [deepcopy(generator.random_state) for _ in generator(nevents)]
     # Pickle generator state after nevents
     pickled_state_1 = pickle.dumps(generator.random_state)
 

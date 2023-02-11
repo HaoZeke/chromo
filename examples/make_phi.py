@@ -98,10 +98,11 @@ def is_prompt(idx, pid, imot):
     return True
 
 
-matches = []
-for Model in get_all_models():
-    if args.model_spec.lower() in Model.pyname.lower():
-        matches.append(Model)
+matches = [
+    Model
+    for Model in get_all_models()
+    if args.model_spec.lower() in Model.pyname.lower()
+]
 assert len(matches) == 1
 
 

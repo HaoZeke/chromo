@@ -94,9 +94,7 @@ class SIBYLLRun(MCRun):
         kin = self.kinematics
         sib_id = self._cross_section_projectiles[abs(kin.p1)]
         sigma = self._lib.sib_sigma_hair(sib_id, self._ecm)
-        if isinstance(sigma, tuple):
-            return sigma[0]
-        return sigma
+        return sigma[0] if isinstance(sigma, tuple) else sigma
 
     def _set_kinematics(self, kin):
         self._production_id = self._lib.isib_pdg2pid(kin.p1)
@@ -112,10 +110,7 @@ class SIBYLLRun(MCRun):
         idb = self._lib.s_csydec.idb
         if sid == 0 or sid > idb.size - 1:
             return
-        if stable:
-            idb[sid - 1] = -abs(idb[sid - 1])
-        else:
-            idb[sid - 1] = abs(idb[sid - 1])
+        idb[sid - 1] = -abs(idb[sid - 1]) if stable else abs(idb[sid - 1])
 
     def _generate(self):
         kin = self.kinematics

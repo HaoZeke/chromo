@@ -40,16 +40,12 @@ class PYTHIA8Event(EventData):
     @staticmethod
     def _get_impact_parameter(pythia):
         hi = pythia.info.hiInfo
-        if hi is None:
-            return np.nan
-        return hi.b
+        return np.nan if hi is None else hi.b
 
     @staticmethod
     def _get_n_wounded(pythia):
         hi = pythia.info.hiInfo
-        if hi is None:
-            return (0, 0)
-        return hi.nPartProj, hi.nPartTarg
+        return (0, 0) if hi is None else (hi.nPartProj, hi.nPartTarg)
 
 
 class Pythia8(MCRun):
@@ -87,7 +83,7 @@ class Pythia8(MCRun):
 
         super().__init__(seed)
 
-        datdir = _cached_data_dir(self._data_url) + "xmldoc"
+        datdir = f"{_cached_data_dir(self._data_url)}xmldoc"
 
         # Must delete PYTHIA8DATA from environ if it exists, since it overrides
         # our argument here. When you install Pythia8 with conda, it sets
@@ -144,10 +140,12 @@ class Pythia8(MCRun):
                 RuntimeWarning,
             )
 
-            # speed-up initialization by not fitting nuclear cross-section
-            config.append("HeavyIon:SigFitNGen = 0")
-            config.append("HeavyIon:SigFitDefPar = 10.79,1.75,0.30,0.0,0.0,0.0,0.0,0.0")
-
+            config.extend(
+                (
+                    "HeavyIon:SigFitNGen = 0",
+                    "HeavyIon:SigFitDefPar = 10.79,1.75,0.30,0.0,0.0,0.0,0.0,0.0",
+                )
+            )
         config += [
             f"Beams:idA = {int(kin.p1)}",
             f"Beams:idB = {int(kin.p2)}",
@@ -180,9 +178,7 @@ class Pythia8(MCRun):
                     continue
                 result.append(line)
         elif isinstance(config, Collection):
-            for item in config:
-                result.append(item.strip())
-
+            result.extend(item.strip() for item in config)
         ignored = ("Random:", "Beams:", "Print:", "Next:")
 
         result2: List[str] = []

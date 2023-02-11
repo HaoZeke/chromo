@@ -204,7 +204,7 @@ class EventData:
         return all(eq(a, b) for (a, b) in zip(at, bt))
 
     def __getstate__(self):
-        t = [
+        return [
             self.generator,
             self.kin.copy(),
             self.nevent,
@@ -225,7 +225,6 @@ class EventData:
             self.parents.copy(),
             self.children.copy() if self.children is not None else None,
         ]
-        return t
 
     def __setstate__(self, state):
         for f, v in zip(dataclasses.fields(self), state):
@@ -726,18 +725,17 @@ class MCRun(ABC):
         """
         with self._temporary_kinematics(kin):
             kin2 = self.kinematics
-            if isinstance(kin2.p2, CompositeTarget):
-                cross_section = CrossSectionData(0, 0, 0, 0, 0, 0, 0)
-                kin3 = copy.copy(kin2)
-                for component, fraction in zip(kin2.p2.components, kin2.p2.fractions):
-                    kin3.p2 = component
-                    # this calls cross_section recursively, which is fine
-                    cs = self.cross_section(kin3)
-                    for i, val in enumerate(dataclasses.astuple(cs)):
-                        cross_section[i] += fraction * val
-                return cross_section
-            else:
+            if not isinstance(kin2.p2, CompositeTarget):
                 return self._cross_section(kin)
+            cross_section = CrossSectionData(0, 0, 0, 0, 0, 0, 0)
+            kin3 = copy.copy(kin2)
+            for component, fraction in zip(kin2.p2.components, kin2.p2.fractions):
+                kin3.p2 = component
+                # this calls cross_section recursively, which is fine
+                cs = self.cross_section(kin3)
+                for i, val in enumerate(dataclasses.astuple(cs)):
+                    cross_section[i] += fraction * val
+            return cross_section
 
     @abstractmethod
     def _cross_section(self, kin):

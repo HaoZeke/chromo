@@ -35,9 +35,9 @@ def force_print(msg):
 
 
 def cache_value(key, s):
-    m = re.search(key + r":[A-Z]+=(.*)" + "$", s, flags=re.MULTILINE)
+    m = re.search(f"{key}:[A-Z]+=(.*)$", s, flags=re.MULTILINE)
     assert m, f"{key} is not a cached cmake variable"
-    return m.group(1)
+    return m[1]
 
 
 def get_models():
@@ -98,7 +98,7 @@ class CMakeBuild(build_ext):
 
         cmake_args = []
         if cmake_generator:
-            cmake_args.append("-G" + cmake_generator)
+            cmake_args.append(f"-G{cmake_generator}")
 
         cmake_args += [
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}/",
@@ -107,10 +107,11 @@ class CMakeBuild(build_ext):
         ]
 
         models = get_models()
-        for model, path in models.items():
-            if path is not None:
-                cmake_args.append(f"-DBUILD_{model}={Path(path)}")
-
+        cmake_args.extend(
+            f"-DBUILD_{model}={Path(path)}"
+            for model, path in models.items()
+            if path is not None
+        )
         # Arbitrary CMake arguments added via environment variable
         # (needed e.g. to build for ARM OSx on conda-forge)
         if "CMAKE_ARGS" in os.environ:
@@ -119,9 +120,9 @@ class CMakeBuild(build_ext):
         build_args = ["--config", cfg]  # needed by some generators, e.g. on Windows
 
         if sys.platform.startswith("darwin"):
-            # Cross-compile support for macOS - respect ARCHFLAGS if set
-            archs = re.findall(r"-arch (\S+)", os.environ.get("ARCHFLAGS", ""))
-            if archs:
+            if archs := re.findall(
+                r"-arch (\S+)", os.environ.get("ARCHFLAGS", "")
+            ):
                 cmake_args += [f"-DCMAKE_OSX_ARCHITECTURES={';'.join(archs)}"]
 
         # Set CMAKE_BUILD_PARALLEL_LEVEL to control the parallel build level

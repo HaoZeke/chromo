@@ -49,9 +49,7 @@ def test_hepmc_io(Model):
 
     restored = []
     with pyhepmc.open(test_file) as f:
-        for event in f:
-            restored.append(event)
-
+        restored.extend(iter(f))
     assert len(restored) == len(expected)
 
     for ev1, ev2 in zip(expected, restored):
